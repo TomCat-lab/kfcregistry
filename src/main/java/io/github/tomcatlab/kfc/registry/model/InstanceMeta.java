@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.net.URI;
 import java.util.Map;
 /**
  * Class: InstanceMeta
@@ -39,6 +40,13 @@ public class InstanceMeta {
         return new InstanceMeta("http", host, port, "kfcrpc");
     }
 
+    public static InstanceMeta from(String url) {
+        URI uri = URI.create(url);
+        return new InstanceMeta(uri.getScheme(),
+                uri.getHost(),
+                uri.getPort(),
+                uri.getPath().substring(1));
+    }
 
 
     public String toUrl() {
