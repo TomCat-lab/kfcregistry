@@ -1,7 +1,6 @@
 package io.github.tomcatlab.kfc.registry.cluster;
 
 import io.github.tomcatlab.kfc.registry.config.KfcRegistryConfigProperties;
-import io.github.tomcatlab.kfc.registry.http.HttpInvoker;
 import io.github.tomcatlab.kfc.registry.model.Server;
 import io.github.tomcatlab.kfc.registry.service.KfcRegistryService;
 import lombok.Data;
@@ -14,9 +13,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -32,8 +28,7 @@ public class Cluster {
    private String port;
    private static String host;
     private KfcRegistryConfigProperties registryConfigProperties;
-    final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    long timeout = 5_000;
+
     Server MYSELF;
 
     @Getter
@@ -73,70 +68,26 @@ public class Cluster {
             }
 
         }
+        new ServerHealth(this).check();
 
-        executor.scheduleWithFixedDelay(() -> {
-            checkHealth();
-            electHeader();
-        }, 10, 10, TimeUnit.SECONDS);
     }
 
-    private void electHeader() {
+    public void electLeader() {
         List<Server> master = servers.stream().filter(Server::isLeader).filter(Server::isStatus).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(master)) {
             log.info("no master need elect");
-            elect();
+            new Election().elect(servers);
         } else if (master.size() > 1) {
             log.info("more than one master need elect");
-            elect();
+            new Election().elect(servers);
         } else {
             log.info("no need elect master is {}", master.get(0));
         }
     }
 
-    private void elect() {
-        Server candidate = null;
-        for (Server server : servers) {
-            if (!server.isStatus()) continue;
-            server.setLeader(false);
-            if (candidate == null) {
-                candidate = server;
-            } else {
-                if (server.hashCode() > candidate.hashCode()) {
-                    candidate = server;
-                }
-            }
-        }
 
-        if (candidate != null) {
-            candidate.setLeader(true);
-            log.info("elect master is {}", candidate);
-        } else {
-            log.info("elect failde,no master need elect");
-        }
-    }
 
-    private void checkHealth() {
-        servers.forEach(
-                server -> {
-                    try {
-                        Server getServer = HttpInvoker.httpGet(server.getUrl() + "/info", Server.class);
-                        if (getServer != null) {
-                            server.setStatus(true);
-                            server.setLeader(getServer.isLeader());
-                            server.setVersion(getServer.getVersion());
-                            log.info("checkHealth success:{}", getServer);
-                        } else {
-                            server.setStatus(false);
-                            log.error("checkHealth error:{}", server);
-                        }
-                    } catch (Exception e) {
-                        server.setStatus(false);
-                        log.error("checkHealth error", e);
-                    }
 
-                }
-        );
-    }
 
     public Server self() {
         if (MYSELF != null) {
