@@ -1,8 +1,10 @@
 package io.github.tomcatlab.kfc.registry;
 
 import io.github.tomcatlab.kfc.registry.cluster.Cluster;
+import io.github.tomcatlab.kfc.registry.cluster.Snapshot;
 import io.github.tomcatlab.kfc.registry.model.InstanceMeta;
 import io.github.tomcatlab.kfc.registry.model.Server;
+import io.github.tomcatlab.kfc.registry.service.KfcRegistryService;
 import io.github.tomcatlab.kfc.registry.service.RegistryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +97,12 @@ public class KfcRegistryController {
         cluster.self().setLeader(true);
         log.info(" ===> leader: {}", cluster.self());
         return cluster.leader();
+    }
+
+    @RequestMapping("/snapshot")
+    public Snapshot snapshot() {
+        log.info(" ===> snapshot");
+        return KfcRegistryService.snapshot();
     }
 
 }

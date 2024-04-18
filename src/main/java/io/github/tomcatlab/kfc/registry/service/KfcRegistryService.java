@@ -1,5 +1,6 @@
 package io.github.tomcatlab.kfc.registry.service;
 
+import io.github.tomcatlab.kfc.registry.cluster.Snapshot;
 import io.github.tomcatlab.kfc.registry.model.InstanceMeta;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -19,6 +20,17 @@ public class KfcRegistryService implements RegistryService {
    final static Map<String,Long> VERSIONS = new ConcurrentHashMap<>();
    public final static Map<String,Long> TIMESTAMPS = new ConcurrentHashMap<>();
    public final static AtomicLong VERSION = new AtomicLong(0);
+
+    public static long restore(Snapshot snapshot) {
+        REGISTRY.clear();
+        REGISTRY.putAll(snapshot.getREGISTRY());
+        VERSIONS.clear();
+        VERSIONS.putAll(snapshot.getVERSIONS());
+        TIMESTAMPS.clear();
+        TIMESTAMPS.putAll(snapshot.getTIMESTAMPS());
+        VERSION.set(snapshot.getVersion());
+        return snapshot.getVersion();
+    }
 
     @Override
     public InstanceMeta register(String service, InstanceMeta instance) {
@@ -44,6 +56,14 @@ public class KfcRegistryService implements RegistryService {
         instance.setStatus(false);
         VERSIONS.put(service,VERSION.incrementAndGet());
         return instance;
+    }
+
+    public static synchronized Snapshot snapshot() {
+        LinkedMultiValueMap<String, InstanceMeta> registry = new LinkedMultiValueMap<>();
+        registry.addAll(REGISTRY);
+        Map<String, Long> versions = new ConcurrentHashMap<>(VERSIONS);
+        Map<String, Long> timestamps = new ConcurrentHashMap<>(TIMESTAMPS);
+        return new Snapshot(registry, versions, timestamps, VERSION.get());
     }
 
     @Override

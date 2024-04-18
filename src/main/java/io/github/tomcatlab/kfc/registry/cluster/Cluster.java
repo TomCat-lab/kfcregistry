@@ -1,6 +1,7 @@
 package io.github.tomcatlab.kfc.registry.cluster;
 
 import io.github.tomcatlab.kfc.registry.config.KfcRegistryConfigProperties;
+import io.github.tomcatlab.kfc.registry.http.HttpInvoker;
 import io.github.tomcatlab.kfc.registry.model.Server;
 import io.github.tomcatlab.kfc.registry.service.KfcRegistryService;
 import lombok.Data;
@@ -86,7 +87,16 @@ public class Cluster {
     }
 
 
-
+    public long syncSnapshotFromLeader() {
+        try {
+            log.info(" =========>>>>> syncSnapshotFromLeader {}", this.leader().getUrl() + "/snapshot");
+            Snapshot snapshot = HttpInvoker.httpGet(this.leader().getUrl() + "/snapshot", Snapshot.class);
+            return KfcRegistryService.restore(snapshot);
+        } catch (Exception ex) {
+            log.error(" =========>>>>> syncSnapshotFromLeader failed.", ex);
+        }
+        return -1;
+    }
 
 
     public Server self() {
