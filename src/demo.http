@@ -28,3 +28,6 @@ Content-Type: application/json
   "port": 8081,
   "scheme": "http"
 }
+
+### 设置leader
+GET http://localhost:8084/setLeader

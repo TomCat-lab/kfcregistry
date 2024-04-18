@@ -89,11 +89,12 @@ public class KfcRegistryController {
         return cluster.leader();
     }
 
-    @RequestMapping("/self")
-    public Server self()
+    @RequestMapping("/setLeader")
+    public Server setLeader()
     {
         cluster.self().setLeader(true);
         log.info(" ===> leader: {}", cluster.self());
-        return cluster.self();
+        return cluster.leader();
     }
+
 }
