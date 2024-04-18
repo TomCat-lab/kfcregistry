@@ -18,7 +18,7 @@ public class KfcRegistryService implements RegistryService {
    final static MultiValueMap<String, InstanceMeta> REGISTRY = new LinkedMultiValueMap<>();
    final static Map<String,Long> VERSIONS = new ConcurrentHashMap<>();
    public final static Map<String,Long> TIMESTAMPS = new ConcurrentHashMap<>();
-   final static AtomicLong VERSION = new AtomicLong(0);
+   public final static AtomicLong VERSION = new AtomicLong(0);
 
     @Override
     public InstanceMeta register(String service, InstanceMeta instance) {

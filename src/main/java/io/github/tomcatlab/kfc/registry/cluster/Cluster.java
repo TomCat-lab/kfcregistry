@@ -3,6 +3,7 @@ package io.github.tomcatlab.kfc.registry.cluster;
 import io.github.tomcatlab.kfc.registry.config.KfcRegistryConfigProperties;
 import io.github.tomcatlab.kfc.registry.http.HttpInvoker;
 import io.github.tomcatlab.kfc.registry.model.Server;
+import io.github.tomcatlab.kfc.registry.service.KfcRegistryService;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Cluster {
     @Value("${server.port}")
-    String port;
-    String host;
+   private String port;
+   private static String host;
     private KfcRegistryConfigProperties registryConfigProperties;
     final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     long timeout = 5_000;
@@ -43,6 +44,14 @@ public class Cluster {
 
     }
 
+    static {
+        try {
+            host = new InetUtils(new InetUtilsProperties()).findFirstNonLoopbackAddress().getHostAddress();
+        }catch (Exception e){
+            host = "127.0.0.1";
+        }
+
+    }
     public void init() {
         self();
         servers = new ArrayList<>();
@@ -134,8 +143,7 @@ public class Cluster {
             return MYSELF;
         }
 
-        host = new InetUtils(new InetUtilsProperties()).findFirstNonLoopbackAddress().getHostAddress();
-        MYSELF = new Server("http://" + host + ":" + port, true, false, -1L);
+        MYSELF = new Server("http://" + host + ":" + port, true, false, KfcRegistryService.VERSION.get());
         return MYSELF;
 
     }
