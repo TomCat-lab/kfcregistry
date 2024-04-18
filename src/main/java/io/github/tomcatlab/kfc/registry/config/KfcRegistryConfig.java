@@ -1,5 +1,6 @@
 package io.github.tomcatlab.kfc.registry.config;
 
+import io.github.tomcatlab.kfc.registry.cluster.Cluster;
 import io.github.tomcatlab.kfc.registry.health.HealthChecker;
 import io.github.tomcatlab.kfc.registry.health.KfcHealthChecker;
 import io.github.tomcatlab.kfc.registry.service.KfcRegistryService;
@@ -25,5 +26,10 @@ public class KfcRegistryConfig {
     @Bean(initMethod = "start", destroyMethod = "stop")
     public HealthChecker healthChecker(@Autowired RegistryService registryService) {
         return new KfcHealthChecker(registryService);
+    }
+
+    @Bean(initMethod = "init")
+    public Cluster cluster(@Autowired KfcRegistryConfigProperties registryConfigProperties) {
+        return new Cluster(registryConfigProperties);
     }
 }

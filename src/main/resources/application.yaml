@@ -5,6 +5,6 @@ spring:
     name: app1
 kfcregistry:
   serverlist:
-    - http://localhost:8484
-    - http://localhost:8485
-    - http://localhost:8486
+    - http://localhost:8084
+    - http://localhost:8085
+    - http://localhost:8086

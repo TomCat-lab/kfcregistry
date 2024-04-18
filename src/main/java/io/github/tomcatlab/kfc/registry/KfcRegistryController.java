@@ -1,6 +1,8 @@
 package io.github.tomcatlab.kfc.registry;
 
+import io.github.tomcatlab.kfc.registry.cluster.Cluster;
 import io.github.tomcatlab.kfc.registry.model.InstanceMeta;
+import io.github.tomcatlab.kfc.registry.model.Server;
 import io.github.tomcatlab.kfc.registry.service.RegistryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ public class KfcRegistryController {
     @Autowired
     RegistryService registryService;
 
+    @Autowired
+    Cluster cluster;
     @RequestMapping("/reg")
     public void register(@RequestParam("service") String service, @RequestBody InstanceMeta instanceMeta){
         log.info("register service:{}",service,"instance:{}",instanceMeta);
@@ -62,5 +66,34 @@ public class KfcRegistryController {
     {
         log.info(" ===> versions {}", services);
         return registryService.versions(services.split(","));
+    }
+
+    @RequestMapping("/info")
+    public Server info()
+    {
+        log.info(" ===> info: {}", cluster.self());
+        return cluster.self();
+    }
+
+    @RequestMapping("/cluster")
+    public List<Server> cluster()
+    {
+        log.info(" ===> info: {}", cluster.getServers());
+        return cluster.getServers();
+    }
+
+    @RequestMapping("/leader")
+    public Server leader()
+    {
+        log.info(" ===> leader: {}", cluster.leader());
+        return cluster.leader();
+    }
+
+    @RequestMapping("/self")
+    public Server self()
+    {
+        cluster.self().setLeader(true);
+        log.info(" ===> leader: {}", cluster.self());
+        return cluster.self();
     }
 }
