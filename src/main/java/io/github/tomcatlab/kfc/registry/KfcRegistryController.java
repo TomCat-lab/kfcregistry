@@ -25,9 +25,9 @@ public class KfcRegistryController {
     @Autowired
     Cluster cluster;
     @RequestMapping("/reg")
-    public void register(@RequestParam("service") String service, @RequestBody InstanceMeta instanceMeta){
+    public InstanceMeta register(@RequestParam("service") String service, @RequestBody InstanceMeta instanceMeta){
         log.info("register service:{}",service,"instance:{}",instanceMeta);
-        registryService.register(service,instanceMeta);
+       return registryService.register(service,instanceMeta);
     }
 
     @RequestMapping("/unreg")

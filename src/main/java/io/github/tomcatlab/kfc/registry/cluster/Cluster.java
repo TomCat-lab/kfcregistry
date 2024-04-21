@@ -88,12 +88,17 @@ public class Cluster {
 
 
     public long syncSnapshotFromLeader() {
-        try {
-            log.info(" =========>>>>> syncSnapshotFromLeader {}", this.leader().getUrl() + "/snapshot");
-            Snapshot snapshot = HttpInvoker.httpGet(this.leader().getUrl() + "/snapshot", Snapshot.class);
-            return KfcRegistryService.restore(snapshot);
-        } catch (Exception ex) {
-            log.error(" =========>>>>> syncSnapshotFromLeader failed.", ex);
+        Server leader = leader();
+        Server self = self();
+        log.debug("leader version:{},my version:{}",leader.getVersion(),self.getVersion());
+        if (!self.isLeader() && self.getVersion()<leader.getVersion()) {
+            try {
+                log.debug(" =========>>>>> syncSnapshotFromLeader {}", this.leader().getUrl() + "/snapshot");
+                Snapshot snapshot = HttpInvoker.httpGet(this.leader().getUrl() + "/snapshot", Snapshot.class);
+                return KfcRegistryService.restore(snapshot);
+            } catch (Exception ex) {
+                log.error(" =========>>>>> syncSnapshotFromLeader failed.", ex);
+            }
         }
         return -1;
     }
@@ -101,6 +106,7 @@ public class Cluster {
 
     public Server self() {
         if (MYSELF != null) {
+            MYSELF.setVersion( KfcRegistryService.VERSION.get());
             return MYSELF;
         }
 

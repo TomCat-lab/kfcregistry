@@ -2,13 +2,13 @@
 GET http://localhost:8084/fetchAll?service = com.cola.kfcrpc.demo.api.UserService
 
 ### 注册一个实例
-POST http://localhost:8084/reg?service=com.cola.kfcrpc.demo.api.UserService
+POST http://localhost:8086/reg?service=com.cola.kfcrpc.demo.api.UserService
 Content-Type: application/json
 
 {
   "context": "kfcrpc",
   "host": "127.0.0.1",
-  "port": 8081,
+  "port": 8080,
   "scheme": "http",
   "status": false,
   "parameters": {
@@ -31,3 +31,20 @@ Content-Type: application/json
 
 ### 设置leader
 GET http://localhost:8084/setLeader
+
+### get version
+GET http://localhost:8084/version?service= com.cola.kfcrpc.demo.api.UserService
+
+### info
+GET http://localhost:8084/info
+### cluster
+GET http://localhost:8086/cluster
+### info 85
+GET http://localhost:8485/info
+### cluster 85
+GET http://localhost:8485/cluster
+### sl 85
+GET http://localhost:8485/sl
+
+### snapshot 8484
+GET http://localhost:8484/snapshot

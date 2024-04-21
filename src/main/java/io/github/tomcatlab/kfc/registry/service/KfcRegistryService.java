@@ -23,17 +23,17 @@ public class KfcRegistryService implements RegistryService {
 
     public static long restore(Snapshot snapshot) {
         REGISTRY.clear();
-        REGISTRY.putAll(snapshot.getREGISTRY());
+        REGISTRY.putAll(snapshot.getRegistry());
         VERSIONS.clear();
-        VERSIONS.putAll(snapshot.getVERSIONS());
+        VERSIONS.putAll(snapshot.getVersions());
         TIMESTAMPS.clear();
-        TIMESTAMPS.putAll(snapshot.getTIMESTAMPS());
+        TIMESTAMPS.putAll(snapshot.getTimestamps());
         VERSION.set(snapshot.getVersion());
         return snapshot.getVersion();
     }
 
     @Override
-    public InstanceMeta register(String service, InstanceMeta instance) {
+    public synchronized InstanceMeta register(String service, InstanceMeta instance) {
         List<InstanceMeta> metas = REGISTRY.get(service);
         instance.setStatus(true);
         if (!CollectionUtils.isEmpty(metas) && metas.contains(instance)) {
@@ -48,7 +48,7 @@ public class KfcRegistryService implements RegistryService {
     }
 
     @Override
-    public InstanceMeta unregister(String service, InstanceMeta instance) {
+    public synchronized InstanceMeta unregister(String service, InstanceMeta instance) {
         List<InstanceMeta> metas = REGISTRY.get(service);
         if (CollectionUtils.isEmpty(metas)) return null;
         metas.removeIf(m -> m.equals(instance));

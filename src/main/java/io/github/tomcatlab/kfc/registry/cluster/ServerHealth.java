@@ -23,11 +23,12 @@ public class ServerHealth {
         executor.scheduleWithFixedDelay(() -> {
             checkHealth();
             cluster.electLeader();
+            cluster.syncSnapshotFromLeader();
         }, 10, 10, TimeUnit.SECONDS);
     }
 
     private void checkHealth() {
-       cluster.getServers().stream().filter(s->!cluster.MYSELF.equals(s)).forEach(this::serverInfo);
+       cluster.getServers().stream().filter(s->!cluster.MYSELF.equals(s)).parallel().forEach(this::serverInfo);
     }
 
     private void serverInfo(Server server) {

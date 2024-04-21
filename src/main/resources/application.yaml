@@ -8,3 +8,7 @@ kfcregistry:
     - http://localhost:8084
     - http://localhost:8085
     - http://localhost:8086
+logging:
+  level:
+    root: info
+    io.github.tomcatlab: debug
