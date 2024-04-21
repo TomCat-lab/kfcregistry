@@ -27,12 +27,20 @@ public class KfcRegistryController {
     @RequestMapping("/reg")
     public InstanceMeta register(@RequestParam("service") String service, @RequestBody InstanceMeta instanceMeta){
         log.info("register service:{}",service,"instance:{}",instanceMeta);
-       return registryService.register(service,instanceMeta);
+        checkleader();
+        return registryService.register(service,instanceMeta);
+    }
+
+    private void checkleader() {
+        if (!cluster.self().isLeader()){
+            throw new RuntimeException("only lead can modify,lead is:"+cluster.leader().getUrl());
+        }
     }
 
     @RequestMapping("/unreg")
     public InstanceMeta unregister(@RequestParam("service") String service, @RequestBody InstanceMeta instanceMeta){
         log.info("unregister service:{}",service,"instance:{}",instanceMeta);
+        checkleader();
        return registryService.unregister(service,instanceMeta);
     }
 
@@ -46,6 +54,7 @@ public class KfcRegistryController {
     public long renew(@RequestParam String service, @RequestBody InstanceMeta instance)
     {
         log.info(" ===> renew {} @ {}", service, instance);
+        checkleader();
         return registryService.renew(instance, service);
     }
 
@@ -53,6 +62,7 @@ public class KfcRegistryController {
     public long renews(@RequestParam String services, @RequestBody InstanceMeta instance)
     {
         log.info(" ===> renew {} @ {}", services, instance);
+        checkleader();
         return registryService.renew(instance, services.split(","));
     }
 
@@ -102,6 +112,7 @@ public class KfcRegistryController {
     @RequestMapping("/snapshot")
     public Snapshot snapshot() {
         log.info(" ===> snapshot");
+        checkleader();
         return KfcRegistryService.snapshot();
     }
 

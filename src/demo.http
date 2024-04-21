@@ -2,7 +2,7 @@
 GET http://localhost:8084/fetchAll?service = com.cola.kfcrpc.demo.api.UserService
 
 ### 注册一个实例
-POST http://localhost:8086/reg?service=com.cola.kfcrpc.demo.api.UserService
+POST http://localhost:8084/reg?service=com.cola.kfcrpc.demo.api.UserService
 Content-Type: application/json
 
 {

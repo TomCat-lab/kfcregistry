@@ -50,6 +50,12 @@ public class Cluster {
     }
     public void init() {
         self();
+        initServers();
+        new ServerHealth(this).check();
+
+    }
+
+    private void initServers() {
         servers = new ArrayList<>();
         for (String url : registryConfigProperties.getServerlist()) {
             if (url.contains("localhost")) {
@@ -69,38 +75,6 @@ public class Cluster {
             }
 
         }
-        new ServerHealth(this).check();
-
-    }
-
-    public void electLeader() {
-        List<Server> master = servers.stream().filter(Server::isLeader).filter(Server::isStatus).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(master)) {
-            log.info("no master need elect");
-            new Election().elect(servers);
-        } else if (master.size() > 1) {
-            log.info("more than one master need elect");
-            new Election().elect(servers);
-        } else {
-            log.info("no need elect master is {}", master.get(0));
-        }
-    }
-
-
-    public long syncSnapshotFromLeader() {
-        Server leader = leader();
-        Server self = self();
-        log.debug("leader version:{},my version:{}",leader.getVersion(),self.getVersion());
-        if (!self.isLeader() && self.getVersion()<leader.getVersion()) {
-            try {
-                log.debug(" =========>>>>> syncSnapshotFromLeader {}", this.leader().getUrl() + "/snapshot");
-                Snapshot snapshot = HttpInvoker.httpGet(this.leader().getUrl() + "/snapshot", Snapshot.class);
-                return KfcRegistryService.restore(snapshot);
-            } catch (Exception ex) {
-                log.error(" =========>>>>> syncSnapshotFromLeader failed.", ex);
-            }
-        }
-        return -1;
     }
 
 
@@ -109,7 +83,8 @@ public class Cluster {
             MYSELF.setVersion( KfcRegistryService.VERSION.get());
             return MYSELF;
         }
-
+        log.info("host:{}", host);
+        log.info("port:{}", port);
         MYSELF = new Server("http://" + host + ":" + port, true, false, KfcRegistryService.VERSION.get());
         return MYSELF;
 
